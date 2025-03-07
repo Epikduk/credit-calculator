@@ -59,6 +59,7 @@ def print_table_or_chart(user_choice, annual_rate, property_value, initial_payme
         print_table(total_sum, overpayment, table)
     elif str == 'chart':
         print_chart(mortgage_term, graph)
+        print_pie(property_value, overpayment)
 
 def print_table(total_sum, overpayment, table):
     print('Размер итоговой суммы с учетом первоначального взноса равен ' + f'{total_sum:,.2f}'.replace(',', ' '))
@@ -75,6 +76,24 @@ def print_chart(mortgage_term, graph):
     ax.set_title('Структура платежей')
     ax.set_ylabel('Сумма, руб.')
     ax.set_xlabel('Платеж')
+    plt.show()
+
+def print_pie(property_value, overpayment):
+    fig, ax = plt.subplots(figsize=(6, 4), subplot_kw=dict(aspect="equal"))
+    data = [property_value, overpayment]
+    legend_payment = [f'Основной долг\n{property_value:,.2f}'.replace(',', ' '), f'Проценты\n{overpayment:,.2f}'.replace(',', ' ')]
+    wedges, texts = ax.pie(data, startangle=-40)
+    bbox_props = dict(boxstyle="square,pad=0.3", fc="w", ec="k", lw=0.72)
+    kw = dict(arrowprops=dict(arrowstyle="-"), bbox=bbox_props, zorder=0, va="center")
+    for i, p in enumerate(wedges):
+        ang = (p.theta2 - p.theta1)/2. + p.theta1
+        y = np.sin(np.deg2rad(ang))
+        x = np.cos(np.deg2rad(ang))
+        horizontalalignment = {-1: "right", 1: "left"}[int(np.sign(x))]
+        connectionstyle = f"angle,angleA=0,angleB={ang}"
+        kw["arrowprops"].update({"connectionstyle": connectionstyle})
+        ax.annotate(legend_payment[i], xy=(x, y), xytext=(1.35*np.sign(x), 1.4*y), horizontalalignment=horizontalalignment, **kw)
+    ax.set_title('Соотношение основного долга и процентов по кредиту')
     plt.show()
 
 def annuity_payment(annual_rate, property_value, initial_payment, mortgage_term, date, user_choice):
